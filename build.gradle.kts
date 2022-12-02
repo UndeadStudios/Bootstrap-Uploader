@@ -1,52 +1,49 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.7.20"
     id("com.gradle.plugin-publish") version "1.1.0"
-    application
+    `kotlin-dsl`
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "com.mark"
+version = "1.1"
 
 repositories {
     mavenCentral()
 }
 
-
 gradlePlugin {
-    website.set("https://github.com/johndoe/GradlePlugins")
-    vcsUrl.set("https://github.com/johndoe/GradlePlugins")
+
     plugins {
-        create("greetingsPlugin") {
-            id = "io.github.johndoe.greeting"
-            implementationClass = "io.github.johndoe.gradle.GreetingPlugin"
-            displayName = "Gradle Greeting plugin"
-            description = "Gradle plugin to say hello!"
-            tags.set(listOf("search", "tags", "for", "your", "hello", "plugin"))
-        }
-        create("goodbyePlugin") {
-            id = "io.github.johndoe.goodbye"
-            implementationClass = "io.github.johndoe.gradle.GoodbyePlugin"
-            displayName = "Gradle Goodbye plugin"
-            description = "Gradle plugin to say goodbye!"
-            tags.set(listOf("search", "tags", "for", "your", "goodbye", "plugin"))
+        create("ReleaseClientBootstrap") {
+            id = "com.mark"
+            implementationClass = "com.mark.BootstrapPlugin"
+            displayName = "Bootstrap Updater"
+            description = "Release your Applications using Signed Bootstraps"
+            version = "1.1"
         }
     }
 }
 
+pluginBundle {
+    website = "https://github.com/Mark7625/bootstrap-release"
+    vcsUrl = "https://github.com/Mark7625/bootstrap-release"
+    tags = listOf("application", "update", "bootstrap")
+}
+
 dependencies {
-    testImplementation(kotlin("test"))
-}
 
-tasks.test {
-    useJUnitPlatform()
-}
+    implementation(gradleApi())
+    implementation("software.amazon.awssdk:s3:2.17.207")
+    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    implementation("com.beust:klaxon:5.5")
+    implementation("commons-net:commons-net:3.8.0")
+    implementation("io.github.microutils:kotlin-logging:1.12.5")
+    implementation("org.slf4j:slf4j-simple:1.7.29")
+    implementation("me.tongfei:progressbar:0.9.2")
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation("com.google.code.gson:gson:2.10")
+    // https://mvnrepository.com/artifact/joda-time/joda-time
+    implementation("joda-time:joda-time:2.12.2")
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
 
-application {
-    mainClass.set("MainKt")
 }
