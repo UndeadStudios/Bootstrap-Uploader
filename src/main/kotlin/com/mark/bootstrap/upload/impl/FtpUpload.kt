@@ -26,7 +26,11 @@ class FtpUpload(
     }
 
     override fun upload(file: File) {
-        client.storeFile("/client/${type}/repo/${file.name}", file.inputStream())
+        if (file.name.endsWith(".jar")) {
+            client.storeFile("/client/${type}/repo/${file.name}", file.inputStream())
+        } else {
+            client.storeFile("/client/${type}/${file.name}", file.inputStream())
+        }
     }
 
     override fun connect() {

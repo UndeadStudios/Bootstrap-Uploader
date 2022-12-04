@@ -53,11 +53,11 @@ class BootstrapTask(
         externalLibs.forEach {
             artifacts.add(
                 Artifacts(
-                hash(it.readBytes()),
-                it.name,
-                "${extension.baseLink.get()}/client/${extension.releaseType.get()}/repo/${it.name}",
-                it.length()
-            )
+                    hash(it.readBytes()),
+                    it.name,
+                    "${extension.baseLink.get()}/client/${extension.releaseType.get()}/repo/${it.name}",
+                    it.length()
+                )
             )
 
             upload.upload(it)
