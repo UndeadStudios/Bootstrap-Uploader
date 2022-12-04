@@ -104,7 +104,7 @@ class BootstrapTask(
 
         project.configurations.getAt("runtimeClasspath").resolvedConfiguration.resolvedArtifacts.forEach {
 
-            val platform = emptyList<Platform>().toMutableList()
+            var platform : MutableList<Platform>? = null
 
             if (it.file.name.contains("injection-annotations")) {
                 return@forEach
@@ -146,6 +146,10 @@ class BootstrapTask(
 
                 if (it.classifier != null) {
                     path += "-${it.classifier}"
+
+                    if (platform == null) {
+                        platform = emptyList<Platform>().toMutableList()
+                    }
 
                     if (it.classifier!!.contains("linux")) {
                         platform.add(Platform(null,"linux"))
