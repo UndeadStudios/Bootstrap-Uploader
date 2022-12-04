@@ -16,7 +16,7 @@ gradlePlugin {
 
     plugins {
         create("ReleaseClientBootstrap") {
-            id = "com.mark.bootstrap.Bootstrap-Uploader"
+            id = "com.mark.bootstrap.bootstrap"
             implementationClass = "com.mark.BootstrapPlugin"
         }
     }
