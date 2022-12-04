@@ -1,4 +1,4 @@
-package com.mark.data
+package com.mark.bootstrap.data
 
 data class Artifacts(
     val hash : String = "",

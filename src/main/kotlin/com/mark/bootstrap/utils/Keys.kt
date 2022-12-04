@@ -1,4 +1,4 @@
-package com.mark.utils
+package com.mark.bootstrap.utils
 
 import org.bouncycastle.jce.X509Principal
 import org.bouncycastle.jce.provider.BouncyCastleProvider

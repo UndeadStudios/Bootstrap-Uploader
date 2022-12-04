@@ -1,13 +1,13 @@
-package com.mark
+package com.mark.bootstrap
 
 import com.beust.klaxon.Klaxon
 import com.google.gson.GsonBuilder
-import com.mark.data.Artifacts
-import com.mark.data.BootstrapManifest
-import com.mark.data.Platform
-import com.mark.upload.impl.FtpUpload
-import com.mark.upload.impl.AwsUpload
-import com.mark.utils.Keys
+import com.mark.bootstrap.data.Artifacts
+import com.mark.bootstrap.data.BootstrapManifest
+import com.mark.bootstrap.data.Platform
+import com.mark.bootstrap.upload.impl.FtpUpload
+import com.mark.bootstrap.upload.impl.AwsUpload
+import com.mark.bootstrap.utils.Keys
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import mu.KotlinLogging
@@ -51,12 +51,14 @@ class BootstrapTask(
         val progress = progress("Uploading", externalLibs.size + 2)
 
         externalLibs.forEach {
-            artifacts.add(Artifacts(
+            artifacts.add(
+                Artifacts(
                 hash(it.readBytes()),
                 it.name,
                 "${extension.baseLink.get()}/client/${extension.releaseType.get()}/repo/${it.name}",
                 it.length()
-            ))
+            )
+            )
 
             upload.upload(it)
             progress.extraMessage = it.name
@@ -176,13 +178,15 @@ class BootstrapTask(
             val filePath = it.file.absolutePath
             val artifactFile = File(filePath)
 
-            artifacts.add(Artifacts(
+            artifacts.add(
+                Artifacts(
                 hash(artifactFile.readBytes()),
                 it.file.name,
                 path,
                 artifactFile.length(),
                 platform
-            ))
+            )
+            )
 
         }
 

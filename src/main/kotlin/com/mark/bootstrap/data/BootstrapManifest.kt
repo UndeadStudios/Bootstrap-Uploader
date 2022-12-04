@@ -1,6 +1,6 @@
-package com.mark.data
+package com.mark.bootstrap.data
 
-import com.mark.data.Artifacts
+import com.mark.bootstrap.data.Artifacts
 
 data class BootstrapManifest(
     val launcherArguments : Array<String> = emptyArray(),

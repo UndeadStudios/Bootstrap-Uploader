@@ -1,4 +1,4 @@
-package com.mark
+package com.mark.bootstrap
 
 import org.gradle.api.provider.Property
 

@@ -1,6 +1,6 @@
-package com.mark.upload.impl
+package com.mark.bootstrap.upload.impl
 
-import com.mark.upload.Uploader
+import com.mark.bootstrap.upload.Uploader
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import java.io.File

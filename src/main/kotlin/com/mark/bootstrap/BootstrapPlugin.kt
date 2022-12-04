@@ -1,6 +1,6 @@
-package com.mark
+package com.mark.bootstrap
 
-import com.mark.utils.Keys
+import com.mark.bootstrap.utils.Keys
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.*
