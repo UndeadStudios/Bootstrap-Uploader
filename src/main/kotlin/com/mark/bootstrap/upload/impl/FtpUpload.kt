@@ -1,6 +1,7 @@
 package com.mark.bootstrap.upload.impl
 
 import com.mark.bootstrap.upload.Uploader
+import me.tongfei.progressbar.ProgressBar
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import java.io.File
@@ -25,8 +26,17 @@ class FtpUpload(
         return client.printWorkingDirectory()
     }
 
-    override fun upload(file: File) {
-        if (file.name.endsWith(".jar")) {
+    override fun upload(file: File, bar : ProgressBar) {
+
+        val type = when(file.name.endsWith(".jar")) {
+            true -> "Jar"
+            false -> "Json"
+        }
+
+        bar.extraMessage = "Uploading: ${file.name} (${type}) / (${"/client/${type}/repo/${file.name}"})"
+        println("Uploading: ${file.name} (${type}) / (${"/client/${type}/repo/${file.name}"})")
+
+        if (type == "Jar") {
             client.storeFile("/client/${type}/repo/${file.name}", file.inputStream())
         } else {
             client.storeFile("/client/${type}/${file.name}", file.inputStream())
@@ -41,10 +51,10 @@ class FtpUpload(
         val login = client.login(properties.getProperty("username"), properties.getProperty("password"))
         if (login) {
             println("FTP Logged in")
-            connected = true
             client.makeDirectory("/client")
             client.makeDirectory("/client/${type}")
             client.makeDirectory("/client/${type}/repo/")
+            connected = true
         } else {
             error("Error Logging into FTP")
         }

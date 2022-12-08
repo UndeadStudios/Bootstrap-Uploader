@@ -36,13 +36,13 @@ class BootstrapTask(
 
         val defaultBootstrap = getDefaultBootstrap()
 
-        val upload = when(extension.uploadType.get()) {
+        val uploadManager = when(extension.uploadType.get()) {
             UploadType.FTP -> FtpUpload(File(saveLocations,"ftp.properties"),extension.releaseType.get())
             UploadType.AWS -> AwsUpload(File(saveLocations,"aws.properties"))
             else -> null
         } ?: error("Upload Type Null")
 
-        upload.connect()
+        uploadManager.connect()
 
         val artifacts = getArtifacts().toMutableList()
 
@@ -60,7 +60,7 @@ class BootstrapTask(
                 )
             )
 
-            upload.upload(it)
+            uploadManager.upload(it)
             progress.extraMessage = it.name
             progress.step()
         }
@@ -78,8 +78,7 @@ class BootstrapTask(
         Keys.sha256(File(saveLocations,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
 
         bootstrapFiles.forEach {
-            upload.upload(it)
-            progress.extraMessage = it.name
+            uploadManager.upload(it,progress)
             progress.step()
         }
 

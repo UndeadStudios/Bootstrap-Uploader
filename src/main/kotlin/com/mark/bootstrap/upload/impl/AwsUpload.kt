@@ -1,6 +1,7 @@
 package com.mark.bootstrap.upload.impl
 
 import com.mark.bootstrap.upload.Uploader
+import me.tongfei.progressbar.ProgressBar
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import java.io.File
@@ -24,7 +25,7 @@ class AwsUpload(
         return client.printWorkingDirectory()
     }
 
-    override fun upload(file: File) {
+    override fun upload(file: File, bar : ProgressBar) {
         TODO("Not yet implemented")
     }
 
