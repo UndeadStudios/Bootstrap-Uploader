@@ -9,7 +9,8 @@ import java.util.*
 
 class FtpUpload(
     val props : File,
-    val type : String
+    val type : String,
+    val passiveMode : Boolean
 ) : Uploader() {
 
     init {
@@ -33,11 +34,13 @@ class FtpUpload(
             false -> "Json"
         }
 
-        bar.extraMessage = "Uploading: ${file.name} (${type}) / (${"/client/${type}/repo/${file.name}"})"
+        bar.extraMessage = "Uploading: ${file.name}"
         println("Uploading: ${file.name} (${type}) / (${"/client/${type}/repo/${file.name}"})")
 
         try {
-            client.enterLocalPassiveMode()
+            if(passiveMode) {
+                client.enterLocalPassiveMode()
+            }
             if (fileType == "Jar") {
                 client.storeFile("/client/${type}/repo/${file.name}", file.inputStream())
             } else {
