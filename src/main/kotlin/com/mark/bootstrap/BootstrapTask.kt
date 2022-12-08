@@ -37,7 +37,7 @@ class BootstrapTask(
         val defaultBootstrap = getDefaultBootstrap()
 
         val uploadManager = when(extension.uploadType.get()) {
-            UploadType.FTP -> FtpUpload(File(saveLocations,"ftp.properties"),extension.releaseType.get(), extension.passiveMode)
+            UploadType.FTP -> FtpUpload(File(saveLocations,"ftp.properties"),extension.releaseType.get(), extension.passiveMode.get())
             UploadType.AWS -> AwsUpload(File(saveLocations,"aws.properties"))
             else -> null
         } ?: error("Upload Type Null")
