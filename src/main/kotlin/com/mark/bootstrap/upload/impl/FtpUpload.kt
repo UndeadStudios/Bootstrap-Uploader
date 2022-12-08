@@ -28,7 +28,7 @@ class FtpUpload(
 
     override fun upload(file: File, bar : ProgressBar) {
 
-        val type = when(file.name.endsWith(".jar")) {
+        val fileType = when(file.name.endsWith(".jar")) {
             true -> "Jar"
             false -> "Json"
         }
@@ -36,11 +36,17 @@ class FtpUpload(
         bar.extraMessage = "Uploading: ${file.name} (${type}) / (${"/client/${type}/repo/${file.name}"})"
         println("Uploading: ${file.name} (${type}) / (${"/client/${type}/repo/${file.name}"})")
 
-        if (type == "Jar") {
-            client.storeFile("/client/${type}/repo/${file.name}", file.inputStream())
-        } else {
-            client.storeFile("/client/${type}/${file.name}", file.inputStream())
+        try {
+            client.enterLocalPassiveMode()
+            if (fileType == "Jar") {
+                client.storeFile("/client/${type}/repo/${file.name}", file.inputStream())
+            } else {
+                client.storeFile("/client/${type}/${file.name}", file.inputStream())
+            }
+        }catch (ex: Exception) {
+            ex.printStackTrace();
         }
+
     }
 
     override fun connect() {
