@@ -27,7 +27,7 @@ class BootstrapTask(
 
     fun init() {
         val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
-        val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json")
+        val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap1.json")
 
         if(!File(saveLocations,"key-private.pem").exists()) {
             logger.error { "Keys not found Generating new keys at: $saveLocations" }
@@ -72,7 +72,7 @@ class BootstrapTask(
 
         val bootstrapFiles = listOf(
             bootstrapLocation,
-            File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json.sha256")
+            File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap1.json.sha256")
         )
 
         Keys.sha256(File(saveLocations,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
