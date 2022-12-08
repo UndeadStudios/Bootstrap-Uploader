@@ -60,7 +60,7 @@ class BootstrapTask(
                 )
             )
 
-            uploadManager.upload(it)
+            uploadManager.upload(it,progress)
             progress.extraMessage = it.name
             progress.step()
         }
