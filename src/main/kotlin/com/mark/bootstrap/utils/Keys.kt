@@ -14,6 +14,7 @@ import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.math.abs
+import kotlin.system.exitProcess
 
 
 /**
@@ -41,14 +42,30 @@ object Keys {
         val keyPair = generateKeyPair()
         val certificate = createSelfSignedCertificate(keyPair)
 
-        privateFile.writeText(privateKeyToPem(keyPair.private))
-        println("Created ${privateFile.absoluteFile}")
+        if(privateFile.exists() && keyFile.exists()) {
+            println("You Already have keys in the following location ${dir.absolutePath} Would you like to make new keys? [Y/N]")
+            val input = Scanner(System.`in`)
 
-        keyFile.writeText(publicKeyToPem(keyPair.public))
-        println("Created ${keyFile.absoluteFile}")
+            while (true) {
+                val line: String = input.nextLine()
+                // Use this to check if it is yes or no
+                if (line.equals("y", ignoreCase = true) || line.equals("yes", ignoreCase = true)) {
+                    privateFile.writeText(privateKeyToPem(keyPair.private))
+                    println("Created ${privateFile.absoluteFile}")
 
-        certFile.writeText(certificateToPem(certificate))
-        println("Created ${certFile.absoluteFile}")
+                    keyFile.writeText(publicKeyToPem(keyPair.public))
+                    println("Created ${keyFile.absoluteFile}")
+
+                    certFile.writeText(certificateToPem(certificate))
+                    println("Created ${certFile.absoluteFile}")
+                } else if (line.equals("n", ignoreCase = true) || line.equals("no", ignoreCase = true)) {
+                    exitProcess(0)
+                } else {
+                    println("Invalid Please Use [Yes,Y,N,NO] lowercase or upper")
+                }
+            }
+
+        }
 
     }
 
