@@ -33,7 +33,7 @@ object Keys {
         Security.addProvider(BouncyCastleProvider())
     }
 
-    fun generateKeys(dir : File,toFile : Boolean) {
+    fun generateKeys(dir : File) {
         println("Creating keys and certificates for Signing and TLS connection..")
 
         val privateFile = File(dir,"key-private.pem")
@@ -42,46 +42,31 @@ object Keys {
         val keyPair = generateKeyPair()
         val certificate = createSelfSignedCertificate(keyPair)
 
-        when(toFile) {
-            true -> {
-                if(privateFile.exists() && keyFile.exists() ) {
-                    println("You Already have keys in the following location ${dir.absolutePath} Would you like to make new keys? [Y/N]")
-                    val input = Scanner(System.`in`)
+        if(privateFile.exists() && keyFile.exists()) {
+            println("You Already have keys in the following location ${dir.absolutePath} Would you like to make new keys? [Y/N]")
+            val input = Scanner(System.`in`)
 
-                    while (true) {
-                        val line: String = input.nextLine()
-                        // Use this to check if it is yes or no
-                        if (line.equals("y", ignoreCase = true) || line.equals("yes", ignoreCase = true)) {
-                            saveToDisk(privateFile,keyFile,certFile,keyPair,certificate)
-                        } else if (line.equals("n", ignoreCase = true) || line.equals("no", ignoreCase = true)) {
-                            exitProcess(0)
-                        } else {
-                            println("Invalid Please Use [Yes,Y,N,NO] lowercase or upper")
-                        }
-                    }
+            while (true) {
+                val line: String = input.nextLine()
+                // Use this to check if it is yes or no
+                if (line.equals("y", ignoreCase = true) || line.equals("yes", ignoreCase = true)) {
+                    privateFile.writeText(privateKeyToPem(keyPair.private))
+                    println("Created ${privateFile.absoluteFile}")
+
+                    keyFile.writeText(publicKeyToPem(keyPair.public))
+                    println("Created ${keyFile.absoluteFile}")
+
+                    certFile.writeText(certificateToPem(certificate))
+                    println("Created ${certFile.absoluteFile}")
+                } else if (line.equals("n", ignoreCase = true) || line.equals("no", ignoreCase = true)) {
+                    exitProcess(0)
                 } else {
-                    saveToDisk(privateFile,keyFile,certFile,keyPair,certificate)
+                    println("Invalid Please Use [Yes,Y,N,NO] lowercase or upper")
                 }
             }
-            false -> {
-                println("Created Private - ${privateKeyToPem(keyPair.private)}")
-                println("Created Public - ${publicKeyToPem(keyPair.public)}")
-                println("Created Cert - ${certificateToPem(certificate)}")
-            }
+
         }
 
-
-    }
-
-    private fun saveToDisk(privateFile : File, keyFile : File, certFile : File, keyPair : KeyPair, certificate : X509Certificate) {
-        privateFile.writeText(privateKeyToPem(keyPair.private))
-        println("Created ${privateFile.absoluteFile}")
-
-        keyFile.writeText(publicKeyToPem(keyPair.public))
-        println("Created ${keyFile.absoluteFile}")
-
-        certFile.writeText(certificateToPem(certificate))
-        println("Created ${certFile.absoluteFile}")
     }
 
     private fun generateKeyPair(): KeyPair {
