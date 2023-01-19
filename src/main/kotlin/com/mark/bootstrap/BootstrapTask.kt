@@ -21,36 +21,59 @@ import java.time.temporal.ChronoUnit
 private val logger = KotlinLogging.logger {}
 
 class BootstrapTask(
-    val extension: BootstrapPluginExtension,
-    val project : Project
+    private val extension: BootstrapPluginExtension,
+    private val project : Project,
+    private val uploadInfo : String,
+    private val keys : String
 ) {
 
     fun init() {
-        val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
+        val saveLocation = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
+        if(!saveLocation.exists()) {
+            saveLocation.mkdirs()
+        }
+
+        val loadingFromFile = uploadInfo.isEmpty()
+
         val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json")
 
-        if(!File(saveLocations,"key-private.pem").exists()) {
-            logger.error { "Keys not found Generating new keys at: $saveLocations" }
-            Keys.generateKeys(saveLocations)
+        if(keys.isEmpty() || !File(saveLocation,"key-private.pem").exists()) {
+            val message = when(loadingFromFile) {
+                true -> "Keys not found Generating new keys at: $saveLocation"
+                false -> "Keys not found Generating new keys:"
+            }
+
+            logger.error { message }
+            Keys.generateKeys(saveLocation,loadingFromFile)
+        }
+
+        if(uploadInfo.isEmpty() || !File(saveLocation,"ftp.properties").exists()) {
+            logger.error { "Upload info not found looking in [${if(loadingFromFile) "ftp.properties" else "args" }]" }
+            exitProcess(0)
+        }
+
+        val loginInfo = when(loadingFromFile) {
+            true -> File(saveLocation,"ftp.properties").toString()
+            false -> uploadInfo
         }
 
         val defaultBootstrap = getDefaultBootstrap()
 
         val uploadManager = when(extension.uploadType.get()) {
-            UploadType.FTP -> FtpUpload(File(saveLocations,"ftp.properties"),extension.releaseType.get(), extension.passiveMode.get())
-            UploadType.AWS -> AwsUpload(File(saveLocations,"aws.properties"))
-            else -> null
-        } ?: error("Upload Type Null")
-
-        uploadManager.connect()
+            UploadType.FTP -> FtpUpload(loginInfo,extension.releaseType.get(), extension.passiveMode.get())
+            UploadType.AWS -> AwsUpload(File(saveLocation,"aws.properties"))
+        }
 
         val artifacts = getArtifacts().toMutableList()
 
         val externalLibs =  File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/repo/").listFiles()
 
+        uploadManager.connect()
+
+
         val progress = progress("Uploading", externalLibs.size + 2)
 
-        externalLibs.forEach {
+        externalLibs?.forEach {
             artifacts.add(
                 Artifacts(
                     hash(it.readBytes()),
@@ -75,7 +98,7 @@ class BootstrapTask(
             File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json.sha256")
         )
 
-        Keys.sha256(File(saveLocations,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
+        Keys.sha256(File(saveLocation,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
 
         bootstrapFiles.forEach {
             uploadManager.upload(it,progress)
@@ -87,13 +110,50 @@ class BootstrapTask(
 
     }
 
+    fun makeBootstrap() {
+        val saveLocation = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
+        if(!saveLocation.exists()) {
+            saveLocation.mkdirs()
+        }
+
+        val loadingFromFile = uploadInfo.isEmpty()
+
+        val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json")
+
+        if(!File(saveLocation,"key-private.pem").exists()) {
+            val message = when(loadingFromFile) {
+                true -> "Keys not found Generating new keys at: $saveLocation"
+                false -> "Keys not found Generating new keys:"
+            }
+
+            logger.error { message }
+            Keys.generateKeys(saveLocation,loadingFromFile)
+        }
+
+
+        val defaultBootstrap = getDefaultBootstrap()
+        val artifacts = getArtifacts().toMutableList()
+
+        defaultBootstrap.artifacts = artifacts.toTypedArray()
+        defaultBootstrap.dependencyHashes = artifacts.associate { it.name to it.hash }
+
+        bootstrapLocation.writeText(GsonBuilder().setPrettyPrinting().create().toJson(defaultBootstrap))
+
+        val bootstrapFiles = listOf(
+            bootstrapLocation,
+            File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json.sha256")
+        )
+
+        Keys.sha256(File(saveLocation,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
+
+
+    }
+
     private fun getDefaultBootstrap() : BootstrapManifest {
         val TEMPLATE = File("${project.projectDir.path}/bootstrap.template")
         if(!TEMPLATE.exists()) {
-            error(
-                "bootstrap.template does not exist at {${TEMPLATE}}," +
-                "Please add the file ${System.lineSeparator()}For more Info please look at the guide"
-            )
+            logger.error { "bootstrap.template does not exist at {${TEMPLATE}}, using default one" }
+            return Klaxon().parse<BootstrapManifest>(File("./bootstrap.template"))!!
         }
         return Klaxon().parse<BootstrapManifest>(TEMPLATE.readText())!!
     }
