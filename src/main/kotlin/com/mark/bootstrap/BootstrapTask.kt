@@ -22,11 +22,14 @@ private val logger = KotlinLogging.logger {}
 
 class BootstrapTask(
     val extension: BootstrapPluginExtension,
-    val project : Project
+    val project : Project,
+    val skipUpload : Boolean
 ) {
 
     fun init() {
         val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
+      
+
         val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json")
 
         if(!File(saveLocations,"key-private.pem").exists()) {
@@ -42,48 +45,52 @@ class BootstrapTask(
             else -> null
         } ?: error("Upload Type Null")
 
-        uploadManager.connect()
 
         val artifacts = getArtifacts().toMutableList()
 
         val externalLibs =  File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/repo/").listFiles()
 
-        val progress = progress("Uploading", externalLibs.size + 2)
+        if(skipUpload) {
 
-        externalLibs.forEach {
-            artifacts.add(
-                Artifacts(
-                    hash(it.readBytes()),
-                    it.name,
-                    "${extension.baseLink.get()}/client/${extension.releaseType.get()}/repo/${it.name}",
-                    it.length()
+            uploadManager.connect()
+
+
+            val progress = progress("Uploading", externalLibs.size + 2)
+
+            externalLibs.forEach {
+                artifacts.add(
+                    Artifacts(
+                        hash(it.readBytes()),
+                        it.name,
+                        "${extension.baseLink.get()}/client/${extension.releaseType.get()}/repo/${it.name}",
+                        it.length()
+                    )
                 )
+
+                uploadManager.upload(it,progress)
+                progress.extraMessage = it.name
+                progress.step()
+            }
+
+            defaultBootstrap.artifacts = artifacts.toTypedArray()
+            defaultBootstrap.dependencyHashes = artifacts.associate { it.name to it.hash }
+
+            bootstrapLocation.writeText(GsonBuilder().setPrettyPrinting().create().toJson(defaultBootstrap))
+
+            val bootstrapFiles = listOf(
+                bootstrapLocation,
+                File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json.sha256")
             )
 
-            uploadManager.upload(it,progress)
-            progress.extraMessage = it.name
-            progress.step()
+            Keys.sha256(File(saveLocations,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
+
+            bootstrapFiles.forEach {
+                uploadManager.upload(it,progress)
+                progress.step()
+            }
+
+            progress.close()
         }
-
-        defaultBootstrap.artifacts = artifacts.toTypedArray()
-        defaultBootstrap.dependencyHashes = artifacts.associate { it.name to it.hash }
-
-        bootstrapLocation.writeText(GsonBuilder().setPrettyPrinting().create().toJson(defaultBootstrap))
-
-        val bootstrapFiles = listOf(
-            bootstrapLocation,
-            File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json.sha256")
-        )
-
-        Keys.sha256(File(saveLocations,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
-
-        bootstrapFiles.forEach {
-            uploadManager.upload(it,progress)
-            progress.step()
-        }
-
-        progress.close()
-
 
     }
 
