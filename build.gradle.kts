@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.7.20"
     `java-gradle-plugin`
@@ -37,6 +39,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10")
     // https://mvnrepository.com/artifact/joda-time/joda-time
     implementation("joda-time:joda-time:2.12.2")
+    implementation(kotlin("stdlib-jdk8"))
 
 
 }

@@ -5,19 +5,14 @@ import me.tongfei.progressbar.ProgressBar
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import java.io.File
+import java.io.StringReader
 import java.util.*
 
 class FtpUpload(
-    val props : File,
+    val props : String,
     val type : String,
     val passiveMode : Boolean
 ) : Uploader() {
-
-    init {
-        if (!props.exists()) {
-            error("Props: ${props.path} Is Missing")
-        }
-    }
 
     val client = FTPClient()
 
@@ -54,7 +49,7 @@ class FtpUpload(
 
     override fun connect() {
         val properties = Properties()
-        properties.load(props.inputStream())
+        properties.load(StringReader(props))
         client.connect(properties.getProperty("host"))
         client.setFileType(FTP.BINARY_FILE_TYPE)
         val login = client.login(properties.getProperty("username"), properties.getProperty("password"))
