@@ -120,7 +120,7 @@ class BootstrapTask(
 
         val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json")
 
-        if(keys.isEmpty() || !File(saveLocation,"key-private.pem").exists()) {
+        if(!File(saveLocation,"key-private.pem").exists()) {
             val message = when(loadingFromFile) {
                 true -> "Keys not found Generating new keys at: $saveLocation"
                 false -> "Keys not found Generating new keys:"

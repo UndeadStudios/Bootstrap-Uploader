@@ -75,7 +75,7 @@ object Keys {
 
     private fun saveToDisk(privateFile : File, keyFile : File, certFile : File, keyPair : KeyPair, certificate : X509Certificate) {
         privateFile.writeText(privateKeyToPem(keyPair.private))
-        println("Created ${privateFile.absoluteFile} - ${privateKeyToPem(keyPair.private)}")
+        println("Created ${privateFile.absoluteFile}")
 
         keyFile.writeText(publicKeyToPem(keyPair.public))
         println("Created ${keyFile.absoluteFile}")

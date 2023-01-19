@@ -17,8 +17,6 @@ class BootstrapPlugin : Plugin<Project> {
 
     override fun apply(project: Project) : Unit = with(project) {
 
-        this.group = "client update"
-
         val extension = project.extensions.create<BootstrapPluginExtension>("releaseSettings")
 
         val bootstrapDependencies by configurations.creating {
@@ -28,6 +26,8 @@ class BootstrapPlugin : Plugin<Project> {
         }
 
         project.task("releaseClient") {
+            this.group = "client update"
+
             dependsOn(bootstrapDependencies)
             dependsOn("jar")
 
@@ -46,6 +46,8 @@ class BootstrapPlugin : Plugin<Project> {
         }
 
         project.task("generateBootstrap") {
+            this.group = "client update"
+
             dependsOn(bootstrapDependencies)
             dependsOn("jar")
 
@@ -63,6 +65,8 @@ class BootstrapPlugin : Plugin<Project> {
         }
 
         project.task("generateKeys") {
+            this.group = "client update"
+
             doLast {
                 val loadingFromFile = uploadInfo.isEmpty()
                 val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
