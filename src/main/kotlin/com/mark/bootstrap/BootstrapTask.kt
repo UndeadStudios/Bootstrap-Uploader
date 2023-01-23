@@ -25,7 +25,7 @@ class BootstrapTask(
     val project : Project
 ) {
 
-    fun init() {
+    fun init(upload : Boolean = true) {
         val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
         if(!saveLocations.exists()) {
             saveLocations.mkdirs()
@@ -38,20 +38,9 @@ class BootstrapTask(
         }
 
         val defaultBootstrap = getDefaultBootstrap()
-
-        val uploadManager = when(extension.uploadType.get()) {
-            UploadType.FTP -> FtpUpload(File(saveLocations,"ftp.properties"),extension.releaseType.get(), extension.passiveMode.get())
-            UploadType.AWS -> AwsUpload(File(saveLocations,"aws.properties"))
-            else -> null
-        } ?: error("Upload Type Null")
-
-        uploadManager.connect()
-
         val artifacts = getArtifacts().toMutableList()
 
         val externalLibs =  File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/repo/").listFiles()
-
-        val progress = progress("Uploading", externalLibs.size + 2)
 
         externalLibs.forEach {
             artifacts.add(
@@ -62,10 +51,6 @@ class BootstrapTask(
                     it.length()
                 )
             )
-
-            uploadManager.upload(it,progress)
-            progress.extraMessage = it.name
-            progress.step()
         }
 
         defaultBootstrap.artifacts = artifacts.toTypedArray()
@@ -80,13 +65,31 @@ class BootstrapTask(
 
         Keys.sha256(File(saveLocations,"key-private.pem"), bootstrapFiles[0], bootstrapFiles[1])
 
-        bootstrapFiles.forEach {
-            uploadManager.upload(it,progress)
-            progress.step()
+
+        if(upload) {
+            val uploadManager = when(extension.uploadType.get()) {
+                UploadType.FTP -> FtpUpload(File(saveLocations,"ftp.properties"),extension.releaseType.get(), extension.passiveMode.get())
+                UploadType.AWS -> AwsUpload(File(saveLocations,"aws.properties"))
+            }
+
+            uploadManager.connect()
+
+            val progress = progress("Uploading", externalLibs.size + 2)
+
+            externalLibs.forEach {
+                uploadManager.upload(it,progress)
+                progress.extraMessage = it.name
+                progress.step()
+            }
+
+            bootstrapFiles.forEach {
+                uploadManager.upload(it,progress)
+                progress.step()
+            }
+
+            progress.close()
+
         }
-
-        progress.close()
-
 
     }
 

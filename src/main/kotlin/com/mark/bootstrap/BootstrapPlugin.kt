@@ -31,10 +31,7 @@ class BootstrapPlugin : Plugin<Project> {
                     from("${buildDir}/repo/.", "${buildDir}/libs/",)
                     into("${buildDir}/bootstrap/${extension.releaseType.get()}/repo/")
                 }
-                BootstrapTask(
-                    extension,
-                    project
-                ).init()
+                BootstrapTask(extension, project).init()
 
             }
 
@@ -46,6 +43,25 @@ class BootstrapPlugin : Plugin<Project> {
             doLast {
                 val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
                 Keys.generateKeys(saveLocations)
+            }
+        }
+
+        project.task("generateBootstrap") {
+            this.group = "client update"
+            dependsOn(bootstrapDependencies)
+            dependsOn("jar")
+
+            doLast {
+                copy {
+                    from(bootstrapDependencies)
+                    into("${buildDir}/bootstrap/${extension.releaseType.get()}/")
+                }
+                copy {
+                    from("${buildDir}/repo/.", "${buildDir}/libs/",)
+                    into("${buildDir}/bootstrap/${extension.releaseType.get()}/repo/")
+                }
+                BootstrapTask(extension, project).init(false)
+
             }
         }
 
