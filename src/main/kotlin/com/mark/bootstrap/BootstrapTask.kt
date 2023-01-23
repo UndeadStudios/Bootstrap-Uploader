@@ -27,6 +27,9 @@ class BootstrapTask(
 
     fun init() {
         val saveLocations = File("${System.getProperty("user.home")}/.gradle/releaseClient/${project.name}/")
+        if(!saveLocations.exists()) {
+            saveLocations.mkdirs()
+        }
         val bootstrapLocation = File("${project.buildDir}/bootstrap/${extension.releaseType.get()}/bootstrap.json")
 
         if(!File(saveLocations,"key-private.pem").exists()) {
