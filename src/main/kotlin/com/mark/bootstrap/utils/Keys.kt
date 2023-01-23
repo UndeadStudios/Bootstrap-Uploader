@@ -68,7 +68,15 @@ object Keys {
                     println("Invalid Please Use [Yes,Y,N,NO] lowercase or upper")
                 }
             }
+        } else {
+            privateFile.writeText(privateKeyToPem(keyPair.private))
+            println("Created ${privateFile.absoluteFile}")
 
+            keyFile.writeText(publicKeyToPem(keyPair.public))
+            println("Created ${keyFile.absoluteFile}")
+
+            certFile.writeText(certificateToPem(certificate))
+            println("Created ${certFile.absoluteFile}")
         }
 
     }
