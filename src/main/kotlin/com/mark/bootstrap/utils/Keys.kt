@@ -36,6 +36,10 @@ object Keys {
     fun generateKeys(dir : File) {
         println("Creating keys and certificates for Signing and TLS connection..")
 
+        if(!dir.exists()) {
+            dir.mkdirs()
+        }
+
         val privateFile = File(dir,"key-private.pem")
         val keyFile = File(dir,"key-public.pem")
         val certFile = File(dir,"launcher.crt")
