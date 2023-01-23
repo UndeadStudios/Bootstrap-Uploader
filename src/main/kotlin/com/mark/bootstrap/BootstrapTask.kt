@@ -13,7 +13,6 @@ import me.tongfei.progressbar.ProgressBarStyle
 import mu.KotlinLogging
 import java.io.File
 import java.security.MessageDigest
-import kotlin.system.exitProcess
 import org.gradle.api.Project
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -180,8 +179,7 @@ class BootstrapTask(
                 }
                 path += ".jar"
             } else {
-                println("ERROR: " + it.file.name + " has no download path!")
-                exitProcess(-1)
+                path = "${extension.customRepo.get()}/${it.file.name}"
             }
 
             val filePath = it.file.absolutePath
